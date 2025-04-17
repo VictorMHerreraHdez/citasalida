@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Citas de Entrega - Churchill School</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      padding: 2rem;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    input:invalid {
+      border-color: red;
+    }
+
+    button {
+      background-color: #003366;
+      color: #fff;
+      border: none;
+      margin-top: 2rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0055a5;
+    }
+
+    .confirmation {
+      margin-top: 2rem;
+      background: #e0f7e9;
+      color: #056b2d;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Agendar Entrega de Alumno</h1>
+
+    <form id="appointmentForm">
+      <label for="studentName">Nombre del Alumno</label>
+      <input type="text" id="studentName" name="studentName" required />
+
+      <label for="appointmentDate">Fecha (Lun-Vie)</label>
+      <input type="date" id="appointmentDate" name="appointmentDate" required />
+
+      <label for="appointmentTime">Hora</label>
+      <select id="appointmentTime" name="appointmentTime" required></select>
+
+      <label for="appointmentType">Tipo de Cita</label>
+      <select id="appointmentType" name="appointmentType" required>
+        <option value="Entrega programada">Entrega programada</option>
+        <option value="Entrega especial">Entrega especial</option>
+      </select>
+
+      <button type="submit">Confirmar Cita</button>
+    </form>
+
+    <div class="confirmation" id="confirmationMessage"></div>
+  </div>
+
+  <script>
+    const timeSelect = document.getElementById("appointmentTime");
+    const appointmentDate = document.getElementById("appointmentDate");
+    const form = document.getElementById("appointmentForm");
+    const confirmation = document.getElementById("confirmationMessage");
+
+    // Generar opciones de horario entre 12:00 y 15:30 cada 15 minutos
+    function generateTimeOptions() {
+      timeSelect.innerHTML = "";
+      const start = 12 * 60; // en minutos
+      const end = 15 * 60 + 30;
+
+      for (let i = start; i <= end; i += 15) {
+        const hours = Math.floor(i / 60);
+        const minutes = i % 60;
+        const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        const option = document.createElement("option");
+        option.value = timeStr;
+        option.textContent = timeStr;
+        timeSelect.appendChild(option);
+      }
+    }
+
+    // Validar si la fecha seleccionada es de lunes a viernes
+    appointmentDate.addEventListener("change", function() {
+      const date = new Date(this.value);
+      const day = date.getDay(); // 0 = Domingo, 6 = Sábado
+
+      if (day === 0 || day === 6) {
+        alert("Por favor seleccione un día entre lunes y viernes.");
+        this.value = "";
+      }
+    });
+
+    // Mostrar mensaje de confirmación al enviar
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const name = document.getElementById("studentName").value;
+      const date = appointmentDate.value;
+      const time = timeSelect.value;
+      const type = document.getElementById("appointmentType").value;
+
+      confirmation.style.display = "block";
+      confirmation.innerHTML = `
+        <strong>Cita Confirmada</strong><br/>
+        Alumno: ${name}<br/>
+        Fecha: ${date}<br/>
+        Hora: ${time}<br/>
+        Tipo: ${type}<br/>
+        Por favor acuda 5 minutos antes a la entrada del colegio.
+      `;
+
+      form.reset();
+    });
+
+    generateTimeOptions();
+  </script>
+</body>
+</html>
