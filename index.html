@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churchill School - Agendamiento de Citas</title>
+    <style>
+        :root {
+            --primary-color: #1a4b8c;
+            --secondary-color: #f8b400;
+            --accent-color: #e74c3c;
+            --light-color: #f5f7fa;
+            --dark-color: #2c3e50;
+            --success-color: #27ae60;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        header img {
+            height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        
+        .form-section, .report-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background-color: #0d3a6e;
+        }
+        
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-header {
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background-color: #e6f2ff;
+        }
+        
+        .calendar-day.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+        
+        .calendar-day.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .time-slot {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .time-slot:hover {
+            background-color: #e6f2ff;
+        }
+        
+        .time-slot.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .time-slot.disabled {
+            color: #ccc;
+            cursor: not-allowed;
+            background-color: #f9f9f9;
+        }
+        
+        .confirmation {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            border-left: 4px solid var(--success-color);
+        }
+        
+        .confirmation.show {
+            display: block;
+        }
+        
+        .chart-container {
+            margin-top: 30px;
+            height: 400px;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filters select {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Churchill School</h1>
+            <p>Sistema de Agendamiento para Recogida de Estudiantes</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="app-container">
+            <section class="form-section">
+                <h2>Agendar Nueva Cita</h2>
+                <p>Seleccione fecha y hora para notificar la recogida de su hijo(a)</p>
+                
+                <div class="form-group">
+                    <label for="parent-name">Nombre del Padre/Madre:</label>
+                    <input type="text" id="parent-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="student-name">Nombre del Estudiante:</label>
+                    <input type="text" id="student-name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="grade">Grado del Estudiante:</label>
+                    <select id="grade" required>
+                        <option value="">Seleccione un grado</option>
+                        <option value="Kinder">Kinder</option>
+                        <option value="Primaria">Primaria</option>
+                        <option value="Secundaria">Secundaria</option>
+                        <option value="Preparatoria">Preparatoria</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="group">Grupo:</label>
+                    <input type="text" id="group" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Seleccione la fecha:</label>
+                    <div id="calendar-navigation">
+                        <button id="prev-month" type="button">‹</button>
+                        <h3 id="current-month">Mes Actual</h3>
+                        <button id="next-month" type="button">›</button>
+                    </div>
+                    <div id="calendar" class="calendar"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Seleccione el horario:</label>
+                    <div id="time-slots" class="time-slots"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="notes">Notas adicionales:</label>
+                    <textarea id="notes" rows="3"></textarea>
+                </div>
+                
+                <button id="submit-appointment">Agendar Cita</button>
+                
+                <div id="confirmation" class="confirmation">
+                    <h3>¡Cita Agendada Exitosamente!</h3>
+                    <p id="confirmation-details"></p>
+                    <p>Recibirá un correo electrónico con los detalles de su cita.</p>
+                </div>
+            </section>
+            
+            <section class="report-section">
+                <h2>Reportes de Citas</h2>
+                
+                <div class="filters">
+                    <select id="report-type">
+                        <option value="daily">Reporte Diario</option>
+                        <option value="monthly">Reporte Mensual</option>
+                        <option value="yearly">Reporte Anual</option>
+                    </select>
+                    
+                    <select id="month-select">
+                        <option value="0">Enero</option>
+                        <option value="1">Febrero</option>
+                        <option value="2">Marzo</option>
+                        <option value="3">Abril</option>
+                        <option value="4">Mayo</option>
+                        <option value="5">Junio</option>
+                        <option value="6">Julio</option>
+                        <option value="7">Agosto</option>
+                        <option value="8">Septiembre</option>
+                        <option value="9">Octubre</option>
+                        <option value="10">Noviembre</option>
+                        <option value="11">Diciembre</option>
+                    </select>
+                    
+                    <select id="year-select">
+                        <!-- Options will be populated by JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <h3>Citas Hoy</h3>
+                        <p id="today-count">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Citas Este Mes</h3>
+                        <p id="month-count">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Citas</h3>
+                        <p id="total-count">0</p>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="appointments-chart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Database setup
+        const DB_NAME = 'ChurchillSchoolDB';
+        const DB_VERSION = 1;
+        const APPOINTMENTS_STORE = 'appointments';
+        
+        let db;
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+        let selectedDate = null;
+        let selectedTime = null;
+        let appointmentsChart = null;
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            initDB();
+            setupCalendar();
+            setupEventListeners();
+            loadReportFilters();
+            generateReports();
+        });
+        
+        // Initialize IndexedDB
+        function initDB() {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+            
+            request.onupgradeneeded = function(event) {
+                const db = event.target.result;
+                
+                if (!db.objectStoreNames.contains(APPOINTMENTS_STORE)) {
+                    const store = db.createObjectStore(APPOINTMENTS_STORE, { 
+                        keyPath: 'id',
+                        autoIncrement: true 
+                    });
+                    
+                    store.createIndex('date', 'date', { unique: false });
+                    store.createIndex('month', 'month', { unique: false });
+                    store.createIndex('year', 'year', { unique: false });
+                    store.createIndex('time', 'time', { unique: false });
+                }
+            };
+            
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                updateStats();
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error opening database:', event.target.error);
+            };
+        }
+        
+        // Setup calendar and time slots
+        function setupCalendar() {
+            updateCalendarHeader();
+            renderCalendar();
+            renderTimeSlots();
+        }
+        
+        // Update calendar header with current month and year
+        function updateCalendarHeader() {
+            const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                               'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+            document.getElementById('current-month').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+        }
+        
+        // Render calendar for current month
+        function renderCalendar() {
+            const calendar = document.getElementById('calendar');
+            calendar.innerHTML = '';
+            
+            // Add day headers
+            const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-header';
+                dayHeader.textContent = day;
+                calendar.appendChild(dayHeader);
+            });
+            
+            // Get first day of month and total days
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            // Add empty cells for days before first day of month
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day disabled';
+                calendar.appendChild(emptyDay);
+            }
+            
+            // Add days of month
+            const today = new Date();
+            const currentDate = today.getDate();
+            const currentMonthToday = today.getMonth();
+            const currentYearToday = today.getFullYear();
+            
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(currentYear, currentMonth, day);
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                // Disable weekends (Saturday = 6, Sunday = 0)
+                if (date.getDay() === 0 || date.getDay() === 6) {
+                    dayElement.classList.add('disabled');
+                } 
+                // Highlight today
+                else if (day === currentDate && currentMonth === currentMonthToday && currentYear === currentYearToday) {
+                    dayElement.classList.add('selected');
+                    if (!selectedDate) {
+                        selectedDate = formatDate(date);
+                        dayElement.classList.add('selected');
+                    }
+                }
+                
+                // Add click event
+                dayElement.addEventListener('click', function() {
+                    if (!this.classList.contains('disabled')) {
+                        // Remove selected class from all days
+                        document.querySelectorAll('.calendar-day').forEach(day => {
+                            day.classList.remove('selected');
+                        });
+                        
+                        // Add selected class to clicked day
+                        this.classList.add('selected');
+                        
+                        // Update selected date
+                        selectedDate = formatDate(date);
+                        
+                        // Update time slots for selected date
+                        renderTimeSlots();
+                    }
+                });
+                
+                calendar.appendChild(dayElement);
+            }
+        }
+        
+        // Render available time slots
+        function renderTimeSlots() {
+            const timeSlotsContainer = document.getElementById('time-slots');
+            timeSlotsContainer.innerHTML = '';
+            
+            if (!selectedDate) return;
+            
+            // Generate time slots from 12:00 PM to 3:30 PM in 30-minute intervals
+            const startHour = 12;
+            const endHour = 15;
+            const intervals = ['00', '30'];
+            
+            for (let hour = startHour; hour <= endHour; hour++) {
+                for (let interval of intervals) {
+                    // Skip 3:30 PM as it's the last possible time
+                    if (hour === endHour && interval === '30') continue;
+                    
+                    const time = `${hour}:${interval}`;
+                    const timeSlot = document.createElement('div');
+                    timeSlot.className = 'time-slot';
+                    timeSlot.textContent = time;
+                    timeSlot.dataset.time = time;
+                    
+                    // Check if time slot is available
+                    checkTimeSlotAvailability(selectedDate, time, (isAvailable) => {
+                        if (!isAvailable) {
+                            timeSlot.classList.add('disabled');
+                        } else {
+                            timeSlot.addEventListener('click', function() {
+                                document.querySelectorAll('.time-slot').forEach(slot => {
+                                    slot.classList.remove('selected');
+                                });
+                                this.classList.add('selected');
+                                selectedTime = this.dataset.time;
+                            });
+                        }
+                    });
+                    
+                    timeSlotsContainer.appendChild(timeSlot);
+                }
+            }
+        }
+        
+        // Check if a time slot is available
+        function checkTimeSlotAvailability(date, time, callback) {
+            if (!db) {
+                callback(true);
+                return;
+            }
+            
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const index = store.index('date');
+            const request = index.openCursor(IDBKeyRange.only(date));
+            
+            let isAvailable = true;
+            
+            request.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.time === time) {
+                        isAvailable = false;
+                    }
+                    cursor.continue();
+                } else {
+                    callback(isAvailable);
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error checking time slot availability:', event.target.error);
+                callback(true);
+            };
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Month navigation
+            document.getElementById('prev-month').addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                updateCalendar();
+            });
+            
+            document.getElementById('next-month').addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                updateCalendar();
+            });
+            
+            // Form submission
+            document.getElementById('submit-appointment').addEventListener('click', function(e) {
+                e.preventDefault();
+                submitAppointment();
+            });
+            
+            // Report filters
+            document.getElementById('report-type').addEventListener('change', generateReports);
+            document.getElementById('month-select').addEventListener('change', generateReports);
+            document.getElementById('year-select').addEventListener('change', generateReports);
+        }
+        
+        // Update calendar when month changes
+        function updateCalendar() {
+            updateCalendarHeader();
+            renderCalendar();
+            selectedDate = null;
+            selectedTime = null;
+            renderTimeSlots();
+        }
+        
+        // Format date as YYYY-MM-DD
+        function formatDate(date) {
+            const d = new Date(date);
+            let month = '' + (d.getMonth() + 1);
+            let day = '' + d.getDate();
+            const year = d.getFullYear();
+            
+            if (month.length < 2) month = '0' + month;
+            if (day.length < 2) day = '0' + day;
+            
+            return [year, month, day].join('-');
+        }
+        
+        // Submit appointment form
+        function submitAppointment() {
+            const parentName = document.getElementById('parent-name').value.trim();
+            const studentName = document.getElementById('student-name').value.trim();
+            const grade = document.getElementById('grade').value;
+            const group = document.getElementById('group').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+            
+            // Validate form
+            if (!parentName || !studentName || !grade || !group || !selectedDate || !selectedTime) {
+                alert('Por favor complete todos los campos requeridos y seleccione fecha y hora.');
+                return;
+            }
+            
+            // Create appointment object
+            const appointment = {
+                parentName,
+                studentName,
+                grade,
+                group,
+                date: selectedDate,
+                time: selectedTime,
+                notes,
+                month: currentMonth,
+                year: currentYear,
+                createdAt: new Date().toISOString()
+            };
+            
+            // Save to database
+            saveAppointment(appointment);
+        }
+        
+        // Save appointment to IndexedDB
+        function saveAppointment(appointment) {
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readwrite');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const request = store.add(appointment);
+            
+            request.onsuccess = function() {
+                showConfirmation(appointment);
+                updateStats();
+                generateReports();
+                resetForm();
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error saving appointment:', event.target.error);
+                alert('Error al guardar la cita. Por favor intente nuevamente.');
+            };
+        }
+        
+        // Show confirmation message
+        function showConfirmation(appointment) {
+            const confirmation = document.getElementById('confirmation');
+            const details = document.getElementById('confirmation-details');
+            
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            
+            const dateTime = new Date(`${appointment.date}T${appointment.time}:00`).toLocaleDateString('es-ES', options);
+            
+            details.textContent = `Su cita para ${appointment.studentName} (${appointment.grade} ${appointment.group}) está programada para el ${dateTime}.`;
+            confirmation.classList.add('show');
+            
+            // Scroll to confirmation
+            confirmation.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Reset form after submission
+        function resetForm() {
+            document.getElementById('parent-name').value = '';
+            document.getElementById('student-name').value = '';
+            document.getElementById('grade').value = '';
+            document.getElementById('group').value = '';
+            document.getElementById('notes').value = '';
+            
+            // Reset time selection but keep date
+            selectedTime = null;
+            document.querySelectorAll('.time-slot.selected').forEach(slot => {
+                slot.classList.remove('selected');
+            });
+        }
+        
+        // Load report filters (years)
+        function loadReportFilters() {
+            const yearSelect = document.getElementById('year-select');
+            const currentYear = new Date().getFullYear();
+            
+            for (let year = currentYear - 5; year <= currentYear + 5; year++) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year === currentYear) {
+                    option.selected = true;
+                }
+                yearSelect.appendChild(option);
+            }
+        }
+        
+        // Generate reports based on filters
+        function generateReports() {
+            const reportType = document.getElementById('report-type').value;
+            const month = parseInt(document.getElementById('month-select').value);
+            const year = parseInt(document.getElementById('year-select').value);
+            
+            switch (reportType) {
+                case 'daily':
+                    generateDailyReport(month, year);
+                    break;
+                case 'monthly':
+                    generateMonthlyReport(year);
+                    break;
+                case 'yearly':
+                    generateYearlyReport();
+                    break;
+            }
+        }
+        
+        // Generate daily report for a specific month
+        function generateDailyReport(month, year) {
+            const startDate = new Date(year, month, 1);
+            const endDate = new Date(year, month + 1, 0);
+            const daysInMonth = endDate.getDate();
+            
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const index = store.index('month');
+            const request = index.openCursor(IDBKeyRange.only(month));
+            
+            const dailyCounts = {};
+            
+            // Initialize all days with 0
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                if (date.getDay() !== 0 && date.getDay() !== 6) { // Skip weekends
+                    dailyCounts[day] = 0;
+                }
+            }
+            
+            request.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const appointment = cursor.value;
+                    if (appointment.year === year) {
+                        const day = new Date(appointment.date).getDate();
+                        dailyCounts[day] = (dailyCounts[day] || 0) + 1;
+                    }
+                    cursor.continue();
+                } else {
+                    renderChart(
+                        Object.keys(dailyCounts).map(day => `${day}`),
+                        Object.values(dailyCounts),
+                        'Citas por Día',
+                        'Día del Mes'
+                    );
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error generating daily report:', event.target.error);
+            };
+        }
+        
+        // Generate monthly report for a specific year
+        function generateMonthlyReport(year) {
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const index = store.index('year');
+            const request = index.openCursor(IDBKeyRange.only(year));
+            
+            const monthlyCounts = Array(12).fill(0);
+            const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 
+                              'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            
+            request.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const month = cursor.value.month;
+                    monthlyCounts[month]++;
+                    cursor.continue();
+                } else {
+                    renderChart(
+                        monthNames,
+                        monthlyCounts,
+                        'Citas por Mes',
+                        'Mes'
+                    );
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error generating monthly report:', event.target.error);
+            };
+        }
+        
+        // Generate yearly report
+        function generateYearlyReport() {
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const request = store.getAll();
+            
+            request.onsuccess = function(event) {
+                const appointments = event.target.result;
+                const yearCounts = {};
+                
+                appointments.forEach(appointment => {
+                    const year = appointment.year;
+                    yearCounts[year] = (yearCounts[year] || 0) + 1;
+                });
+                
+                const years = Object.keys(yearCounts).sort();
+                const counts = years.map(year => yearCounts[year]);
+                
+                renderChart(
+                    years,
+                    counts,
+                    'Citas por Año',
+                    'Año'
+                );
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error generating yearly report:', event.target.error);
+            };
+        }
+        
+        // Render chart using Chart.js
+        function renderChart(labels, data, title, xAxisLabel) {
+            const ctx = document.getElementById('appointments-chart').getContext('2d');
+            
+            // Destroy previous chart if it exists
+            if (appointmentsChart) {
+                appointmentsChart.destroy();
+            }
+            
+            appointmentsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: title,
+                        data: data,
+                        backgroundColor: '#1a4b8c',
+                        borderColor: '#0d3a6e',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Número de Citas'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: xAxisLabel
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: {
+                                size: 16
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update statistics counters
+        function updateStats() {
+            if (!db) return;
+            
+            const today = formatDate(new Date());
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            
+            // Count appointments for today
+            countAppointmentsByDate(today, count => {
+                document.getElementById('today-count').textContent = count;
+            });
+            
+            // Count appointments for this month
+            countAppointmentsByMonth(currentMonth, currentYear, count => {
+                document.getElementById('month-count').textContent = count;
+            });
+            
+            // Count total appointments
+            countAllAppointments(count => {
+                document.getElementById('total-count').textContent = count;
+            });
+        }
+        
+        // Count appointments for a specific date
+        function countAppointmentsByDate(date, callback) {
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const index = store.index('date');
+            const request = index.count(IDBKeyRange.only(date));
+            
+            request.onsuccess = function() {
+                callback(request.result);
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error counting appointments by date:', event.target.error);
+                callback(0);
+            };
+        }
+        
+        // Count appointments for a specific month
+        function countAppointmentsByMonth(month, year, callback) {
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const index = store.index('month');
+            const request = index.openCursor(IDBKeyRange.only(month));
+            
+            let count = 0;
+            
+            request.onsuccess = function(event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.year === year) {
+                        count++;
+                    }
+                    cursor.continue();
+                } else {
+                    callback(count);
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error counting appointments by month:', event.target.error);
+                callback(0);
+            };
+        }
+        
+        // Count all appointments
+        function countAllAppointments(callback) {
+            const transaction = db.transaction(APPOINTMENTS_STORE, 'readonly');
+            const store = transaction.objectStore(APPOINTMENTS_STORE);
+            const request = store.count();
+            
+            request.onsuccess = function() {
+                callback(request.result);
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error counting all appointments:', event.target.error);
+                callback(0);
+            };
+        }
+    </script>
+</body>
+</html>
